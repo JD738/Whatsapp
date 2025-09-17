@@ -4,8 +4,8 @@ const axios = require("axios");
 
 const app = express().use(bodyParser.json());
 
-const WHATSAPP_TOKEN = "EAAVgEZCipgYABO3RKEj7B8X5z24oJBVi66YzaKevvAr8V1zkUewhvx7tBwJVHqOyUBtxIF1cvAVeAF2btx85oycl93eaiT43Or6PB2CfPJqJy86hr5ZCKuL4KgqZAO4CfPYcW5Mr8EsDAdjEyNkMmInPbVA14oisVbBjFpkIfMlb0tmzngxYlj3NUDng0gerwZDZD";
-const PHONE_NUMBER_ID = "236899979511201";
+const WHATSAPP_TOKEN = "EAAVgEZCipgYABO3RKEj7B8X5z24oJBVi66YzaKevvAr8V1zkUewhvx7tBwJVHqOyUBtxIF1cvAVeAF2btx85oycl93eaiT43Or6PB2CfPJqJy86hr5ZCKuL4KgqZAO4CfPYcW5Mr8EsDAdjEyNkMmInPbVA14oisVbBjFpkIfMlb0tmzngxYlj3NUDng0gerwZDZD";   // 🔑 your access token
+const PHONE_NUMBER_ID = "236899979511201";       // 📱 your phone number ID
 
 // ✅ Verify Webhook
 app.get("/webhook", (req, res) => {
@@ -31,27 +31,39 @@ app.post("/webhook", async (req, res) => {
     if (messages && messages[0]) {
       const msg = messages[0];
       const from = msg.from;
-      let userChoice = null;
 
-      if (msg.type === "interactive") {
-        userChoice = msg.interactive.button_reply.id;
+      // 📌 Handle plain text messages
+      if (msg.type === "text") {
+        console.log("User sent text:", msg.text.body);
+
+        if (msg.text.body.toLowerCase() === "hi") {
+          await sendInteractive(
+            from,
+            "Hello 👋 Welcome to WhiteCode – Your Trusted Edtech Partner.\nPlease select your organization type:",
+            [
+              { id: "school", title: "🏫 School" },
+              { id: "college", title: "🎓 College" }
+            ]
+          );
+        }
+      }
+
+      // 📌 Handle button replies (interactive)
+      else if (msg.type === "interactive") {
+        const userChoice = msg.interactive.button_reply.id;
         console.log("User clicked:", userChoice);
 
-        // School Path
+        // School path
         if (userChoice === "school") {
           await sendSchoolTypeQuestion(from);
-        } else if (
-          ["school_state", "school_cbse", "school_other"].includes(userChoice)
-        ) {
+        } else if (["school_state", "school_cbse", "school_other"].includes(userChoice)) {
           await sendSchoolServices(from);
         }
 
-        // College Path
+        // College path
         else if (userChoice === "college") {
           await sendCollegeTypeQuestion(from);
-        } else if (
-          ["college_affiliated", "college_non_affiliated", "college_autonomous", "college_other"].includes(userChoice)
-        ) {
+        } else if (["college_affiliated", "college_non_affiliated", "college_autonomous", "college_other"].includes(userChoice)) {
           await sendCollegeServices(from);
         } else if (userChoice === "college_tech") {
           await sendCollegeTechServices(from);
@@ -61,7 +73,7 @@ app.post("/webhook", async (req, res) => {
           await sendCollegeAcademicServices(from);
         }
 
-        // Common
+        // Common flows
         else if (userChoice === "book_demo") {
           await sendDemoForm(from);
         } else if (userChoice === "download_brochure") {
@@ -169,16 +181,13 @@ async function sendDemoForm(to) {
 }
 
 async function sendBrochure(to) {
-  return sendText(
-    to,
-    "📄 Download Brochure: https://whitecode.co.in/brochure.pdf"
-  );
+  return sendText(to, "📄 Download Brochure: https://whitecode.co.in/brochure.pdf");
 }
 
 async function sendGoodbye(to) {
   return sendText(
     to,
-    "Thank you for connecting! 📞 +91 9175551176 | +91 7972227216 ✉ info@whitecode.co.in 🌐 www.whitecode.co.in"
+    "Thank you for connecting!\n📞 +91 9175551176 | +91 7972227216\n✉ info@whitecode.co.in\n🌐 www.whitecode.co.in"
   );
 }
 
