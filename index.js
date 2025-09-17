@@ -23,7 +23,7 @@ app.get("/webhook", (req, res) => {
 // ✅ Incoming Messages
 app.post("/webhook", async (req, res) => {
   const body = req.body;
-
+  console.log("body",body);
   if (body.object) {
     const entry = body.entry?.[0]?.changes?.[0]?.value;
     const messages = entry?.messages;
