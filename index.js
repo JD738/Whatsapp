@@ -4,12 +4,13 @@ const axios = require("axios");
 
 const app = express().use(bodyParser.json());
 
+// 🔑 Replace with your real values
 const WHATSAPP_TOKEN = "EAAVgEZCipgYABO3RKEj7B8X5z24oJBVi66YzaKevvAr8V1zkUewhvx7tBwJVHqOyUBtxIF1cvAVeAF2btx85oycl93eaiT43Or6PB2CfPJqJy86hr5ZCKuL4KgqZAO4CfPYcW5Mr8EsDAdjEyNkMmInPbVA14oisVbBjFpkIfMlb0tmzngxYlj3NUDng0gerwZDZD";   // 🔑 your access token
-const PHONE_NUMBER_ID = "236899979511201";       // 📱 your phone number ID
+const PHONE_NUMBER_ID = "236899979511201";  
 
 // ✅ Verify Webhook
 app.get("/webhook", (req, res) => {
-  const VERIFY_TOKEN = "jaydeep_khelbude";
+  const VERIFY_TOKEN = "jaydeep_khelbude"; // your verify token
   if (
     req.query["hub.mode"] === "subscribe" &&
     req.query["hub.verify_token"] === VERIFY_TOKEN
@@ -23,7 +24,7 @@ app.get("/webhook", (req, res) => {
 // ✅ Incoming Messages
 app.post("/webhook", async (req, res) => {
   const body = req.body;
-  console.log("body",body);
+
   if (body.object) {
     const entry = body.entry?.[0]?.changes?.[0]?.value;
     const messages = entry?.messages;
@@ -32,38 +33,35 @@ app.post("/webhook", async (req, res) => {
       const msg = messages[0];
       const from = msg.from;
 
-      // 📌 Handle plain text messages
+      // 📝 Handle free-text
       if (msg.type === "text") {
-        console.log("User sent text:", msg.text.body);
+        const userText = msg.text.body;
+        console.log("User sent text:", userText);
 
-        if (msg.text.body.toLowerCase() === "hi") {
-          await sendInteractive(
-            from,
-            "Hello 👋 Welcome to WhiteCode – Your Trusted Edtech Partner.\nPlease select your organization type:",
-            [
-              { id: "school", title: "🏫 School" },
-              { id: "college", title: "🎓 College" }
-            ]
-          );
-        }
+        await sendText(from, `You said: ${userText}`);
+        await sendOrgTypeQuestion(from); // first menu
       }
 
-      // 📌 Handle button replies (interactive)
-      else if (msg.type === "interactive") {
+      // 🖱 Handle button clicks
+      if (msg.type === "interactive") {
         const userChoice = msg.interactive.button_reply.id;
         console.log("User clicked:", userChoice);
 
-        // School path
+        // School Path
         if (userChoice === "school") {
           await sendSchoolTypeQuestion(from);
-        } else if (["school_state", "school_cbse", "school_other"].includes(userChoice)) {
+        } else if (
+          ["school_state", "school_cbse", "school_other"].includes(userChoice)
+        ) {
           await sendSchoolServices(from);
         }
 
-        // College path
+        // College Path
         else if (userChoice === "college") {
           await sendCollegeTypeQuestion(from);
-        } else if (["college_affiliated", "college_non_affiliated", "college_autonomous", "college_other"].includes(userChoice)) {
+        } else if (
+          ["college_affiliated", "college_non_affiliated", "college_autonomous", "college_other"].includes(userChoice)
+        ) {
           await sendCollegeServices(from);
         } else if (userChoice === "college_tech") {
           await sendCollegeTechServices(from);
@@ -73,7 +71,7 @@ app.post("/webhook", async (req, res) => {
           await sendCollegeAcademicServices(from);
         }
 
-        // Common flows
+        // Common
         else if (userChoice === "book_demo") {
           await sendDemoForm(from);
         } else if (userChoice === "download_brochure") {
@@ -90,8 +88,16 @@ app.post("/webhook", async (req, res) => {
 
 
 // ----------------------
-// 📌 SCHOOL FLOWS
+// 📌 MENUS
 // ----------------------
+async function sendOrgTypeQuestion(to) {
+  return sendInteractive(to, "Hello 👋 Welcome to WhiteCode!\nPlease select your organization type:", [
+    { id: "school", title: "School" },
+    { id: "college", title: "College" }
+  ]);
+}
+
+// School Flow
 async function sendSchoolTypeQuestion(to) {
   return sendInteractive(to, "What is your school type?", [
     { id: "school_state", title: "State Board" },
@@ -99,7 +105,6 @@ async function sendSchoolTypeQuestion(to) {
     { id: "school_other", title: "Other" }
   ]);
 }
-
 async function sendSchoolServices(to) {
   return sendInteractive(
     to,
@@ -112,10 +117,7 @@ async function sendSchoolServices(to) {
   );
 }
 
-
-// ----------------------
-// 📌 COLLEGE FLOWS
-// ----------------------
+// College Flow
 async function sendCollegeTypeQuestion(to) {
   return sendInteractive(to, "What is your college type?", [
     { id: "college_affiliated", title: "Affiliated" },
@@ -124,7 +126,6 @@ async function sendCollegeTypeQuestion(to) {
     { id: "college_other", title: "Other" }
   ]);
 }
-
 async function sendCollegeServices(to) {
   return sendInteractive(to, "👉 Select Service Type:", [
     { id: "college_tech", title: "Tech Services" },
@@ -132,7 +133,6 @@ async function sendCollegeServices(to) {
     { id: "college_academic", title: "Academic Services" }
   ]);
 }
-
 async function sendCollegeTechServices(to) {
   return sendInteractive(
     to,
@@ -144,7 +144,6 @@ async function sendCollegeTechServices(to) {
     ]
   );
 }
-
 async function sendCollegeAccreditationServices(to) {
   return sendInteractive(
     to,
@@ -156,7 +155,6 @@ async function sendCollegeAccreditationServices(to) {
     ]
   );
 }
-
 async function sendCollegeAcademicServices(to) {
   return sendInteractive(
     to,
@@ -169,28 +167,25 @@ async function sendCollegeAcademicServices(to) {
   );
 }
 
-
-// ----------------------
-// 📌 COMMON FLOWS
-// ----------------------
+// Common
 async function sendDemoForm(to) {
   return sendText(
     to,
     "Great! Please provide:\n🏫 Institution Name\n👤 Full Name\n📧 Email\n📅 Preferred Date & Time"
   );
 }
-
 async function sendBrochure(to) {
-  return sendText(to, "📄 Download Brochure: https://whitecode.co.in/brochure.pdf");
+  return sendText(
+    to,
+    "📄 Download Brochure: https://whitecode.co.in/brochure.pdf"
+  );
 }
-
 async function sendGoodbye(to) {
   return sendText(
     to,
-    "Thank you for connecting!\n📞 +91 9175551176 | +91 7972227216\n✉ info@whitecode.co.in\n🌐 www.whitecode.co.in"
+    "Thank you for connecting! 📞 +91 9175551176 | +91 7972227216 ✉ info@whitecode.co.in 🌐 www.whitecode.co.in"
   );
 }
-
 
 // ----------------------
 // 📌 UTIL FUNCTIONS
@@ -216,7 +211,6 @@ async function sendInteractive(to, bodyText, buttons) {
     { headers: { Authorization: `Bearer ${WHATSAPP_TOKEN}` } }
   );
 }
-
 async function sendText(to, text) {
   return axios.post(
     `https://graph.facebook.com/v20.0/${PHONE_NUMBER_ID}/messages`,
