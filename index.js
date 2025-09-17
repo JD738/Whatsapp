@@ -4,12 +4,12 @@ const axios = require("axios");
 
 const app = express().use(bodyParser.json());
 
-const WHATSAPP_TOKEN = process.env.WHATSAPP_TOKEN;
-const PHONE_NUMBER_ID = process.env.PHONE_NUMBER_ID;
+const WHATSAPP_TOKEN = "EAAVgEZCipgYABO3RKEj7B8X5z24oJBVi66YzaKevvAr8V1zkUewhvx7tBwJVHqOyUBtxIF1cvAVeAF2btx85oycl93eaiT43Or6PB2CfPJqJy86hr5ZCKuL4KgqZAO4CfPYcW5Mr8EsDAdjEyNkMmInPbVA14oisVbBjFpkIfMlb0tmzngxYlj3NUDng0gerwZDZD";
+const PHONE_NUMBER_ID = "236899979511201";
 
 // ✅ Verify Webhook
 app.get("/webhook", (req, res) => {
-  const VERIFY_TOKEN = "your_verify_token";
+  const VERIFY_TOKEN = "jaydeep_khelbude";
   if (
     req.query["hub.mode"] === "subscribe" &&
     req.query["hub.verify_token"] === VERIFY_TOKEN
