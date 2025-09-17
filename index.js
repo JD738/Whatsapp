@@ -38,7 +38,7 @@ app.post("/webhook", async (req, res) => {
         const userText = msg.text.body;
         console.log("User sent text:", userText);
 
-        await sendText(from, `You said: ${userText}`);
+        // await sendText(from, `You said: ${userText}`);
         await sendOrgTypeQuestion(from); // first menu
       }
 
@@ -91,11 +91,18 @@ app.post("/webhook", async (req, res) => {
 // 📌 MENUS
 // ----------------------
 async function sendOrgTypeQuestion(to) {
-  return sendInteractive(to, "Hello 👋 Welcome to WhiteCode!\nPlease select your organization type:", [
-    { id: "school", title: "School" },
-    { id: "college", title: "College" }
-  ]);
+  return sendInteractive(
+    to,
+    "Hello! 👋\nWelcome to WhiteCode – Your Trusted Edtech Partner.\nWe provide innovative digital solutions for:\n1️⃣ Schools\n2️⃣ Colleges\n3️⃣ Universities\n4️⃣ Corporates / Custom Development\n\n👉 Please select your organization type:",
+    [
+      { id: "school", title: "🏫 School" },
+      { id: "college", title: "🎓 College" },
+      { id: "university", title: "🎓 University" },
+      { id: "corporate", title: "🏢 Corporate" }
+    ]
+  );
 }
+
 
 // School Flow
 async function sendSchoolTypeQuestion(to) {
